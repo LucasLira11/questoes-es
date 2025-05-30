@@ -19,9 +19,9 @@
     padding: 30px 40px 40px 40px;
     border-radius: 12px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    text-align: center;
   }
   h1 {
-    text-align: center;
     color: #333;
     margin-bottom: 30px;
   }
@@ -38,6 +38,7 @@
   }
   .options {
     margin-bottom: 20px;
+    text-align: left;
   }
   label.option {
     display: block;
@@ -98,10 +99,10 @@
     border: 1px solid #f5c2c7;
   }
   #result {
-    text-align: center;
     font-size: 22px;
     font-weight: 700;
     color: #222;
+    margin-top: 15px;
   }
   #restart-btn {
     margin-top: 25px;
@@ -119,6 +120,17 @@
   #restart-btn:hover {
     background: #1e7e34;
   }
+  #back-btn {
+    display: none;
+    margin-top: 15px;
+    color: #1a73e8;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 16px;
+  }
+  #back-btn:hover {
+    color: #145dbf;
+  }
 </style>
 </head>
 <body>
@@ -132,7 +144,7 @@
   <div id="feedback"></div>
   <div id="result" style="display:none;"></div>
   <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
-  <button href="index.html" style="display:none;">Voltar para o menu</button>
+  <a href="index.html" id="back-btn">Voltar para o menu</a>
 </div>
 
 <script>
@@ -210,123 +222,123 @@ const processosModeloCatalog = [
   { question: "O que é Definition of Done (Definição de Pronto)?", options: {a:"Critérios que definem quando uma tarefa está completa", b:"Plano de projeto", c:"Reunião", d:"Teste manual"}, answer: "a" }
 ];
 
+function getRandomQuestions(catalog, n) {
+  const shuffled = catalog
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a,b) => a.sort - b.sort)
+    .map(({value}) => value);
+  return shuffled.slice(0, n);
+}
 
+let questions = [];
+let currentQuestionIndex = 0;
+let score = 0;
 
+const questionNumberElem = document.getElementById('question-number');
+const questionTextElem = document.getElementById('question-text');
+const optionsForm = document.getElementById('options-form');
+const submitBtn = document.getElementById('submit-btn');
+const feedbackElem = document.getElementById('feedback');
+const resultElem = document.getElementById('result');
+const restartBtn = document.getElementById('restart-btn');
+const backBtn = document.getElementById('back-btn');
 
-  function getRandomQuestions(catalog, n) {
-    const shuffled = catalog
-      .map(value => ({ value, sort: Math.random() }))
-      .sort((a,b) => a.sort - b.sort)
-      .map(({value}) => value);
-    return shuffled.slice(0, n);
+function loadQuestion() {
+  submitBtn.disabled = true;
+  feedbackElem.textContent = '';
+  feedbackElem.className = '';
+  const q = questions[currentQuestionIndex];
+  questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
+  questionTextElem.textContent = q.question;
+
+  optionsForm.innerHTML = '';
+  for (const [key, optionText] of Object.entries(q.options)) {
+    const optionHTML = `
+      <label class="option">
+        <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+      </label>
+    `;
+    optionsForm.insertAdjacentHTML('beforeend', optionHTML);
   }
 
-  let questions = [];
-  let currentQuestionIndex = 0;
-  let score = 0;
+  const inputs = optionsForm.querySelectorAll('input[name="option"]');
+  inputs.forEach(input => {
+    input.checked = false;
+    input.disabled = false;
+    input.addEventListener('change', () => {
+      submitBtn.disabled = false;
+    });
+  });
+}
 
-  const questionNumberElem = document.getElementById('question-number');
-  const questionTextElem = document.getElementById('question-text');
-  const optionsForm = document.getElementById('options-form');
-  const submitBtn = document.getElementById('submit-btn');
-  const feedbackElem = document.getElementById('feedback');
-  const resultElem = document.getElementById('result');
-  const restartBtn = document.getElementById('restart-btn');
+function showResult() {
+  questionNumberElem.style.display = 'none';
+  questionTextElem.style.display = 'none';
+  optionsForm.style.display = 'none';
+  submitBtn.style.display = 'none';
+  feedbackElem.style.display = 'none';
 
-  function loadQuestion() {
-    submitBtn.disabled = true;
+  resultElem.style.display = 'block';
+  resultElem.textContent = `Você acertou ${score} de ${questions.length} questões.`;
+
+  restartBtn.style.display = 'block';
+  backBtn.style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < questions.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+}
+
+submitBtn.addEventListener('click', () => {
+  const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+  if (!selectedOption) return;
+
+  const answer = selectedOption.value;
+  const q = questions[currentQuestionIndex];
+  if (answer === q.answer) {
+    score++;
+    feedbackElem.textContent = "Resposta correta!";
+    feedbackElem.className = "correct";
+  } else {
+    feedbackElem.textContent = `Errado! A resposta correta é: ${q.answer}) ${q.options[q.answer]}`;
+    feedbackElem.className = "wrong";
+  }
+  submitBtn.disabled = true;
+  optionsForm.querySelectorAll('input[name="option"]').forEach(i => i.disabled = true);
+
+  setTimeout(() => {
     feedbackElem.textContent = '';
     feedbackElem.className = '';
-    const q = questions[currentQuestionIndex];
-    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
-    questionTextElem.textContent = q.question;
+    nextQuestion();
+  }, 2500);
+});
 
-    optionsForm.innerHTML = '';
-    for (const [key, optionText] of Object.entries(q.options)) {
-      const optionHTML = `
-        <label class="option">
-          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
-        </label>
-      `;
-      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
-    }
+restartBtn.addEventListener('click', () => {
+  questions = getRandomQuestions(processosModeloCatalog, 10);
+  currentQuestionIndex = 0;
+  score = 0;
 
-    const inputs = optionsForm.querySelectorAll('input[name="option"]');
-    inputs.forEach(input => {
-      input.checked = false;
-      input.disabled = false;
-      input.addEventListener('change', () => {
-        submitBtn.disabled = false;
-      });
-    });
-  }
+  questionNumberElem.style.display = 'block';
+  questionTextElem.style.display = 'block';
+  optionsForm.style.display = 'block';
+  submitBtn.style.display = 'inline-block';
+  feedbackElem.style.display = 'block';
+  resultElem.style.display = 'none';
+  restartBtn.style.display = 'none';
+  backBtn.style.display = 'none';
 
-  function showResult() {
-    questionNumberElem.style.display = 'none';
-    questionTextElem.style.display = 'none';
-    optionsForm.style.display = 'none';
-    submitBtn.style.display = 'none';
-    feedbackElem.style.display = 'none';
+  loadQuestion();
+});
 
-    resultElem.style.display = 'block';
-    resultElem.textContent = `Você acertou ${score} de ${questions.length} questões.`;
-
-    restartBtn.style.display = 'block';
-  }
-
-  function nextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      loadQuestion();
-    } else {
-      showResult();
-    }
-  }
-
-  submitBtn.addEventListener('click', () => {
-    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
-    if (!selectedOption) return;
-
-    const answer = selectedOption.value;
-    const q = questions[currentQuestionIndex];
-    if (answer === q.answer) {
-      score++;
-      feedbackElem.textContent = "Resposta correta!";
-      feedbackElem.className = "correct";
-    } else {
-      feedbackElem.textContent = `Errado! A resposta correta é: ${q.answer}) ${q.options[q.answer]}`;
-      feedbackElem.className = "wrong";
-    }
-    submitBtn.disabled = true;
-    optionsForm.querySelectorAll('input[name="option"]').forEach(i => i.disabled = true);
-
-    setTimeout(() => {
-      feedbackElem.textContent = '';
-      feedbackElem.className = '';
-      nextQuestion();
-    }, 2500);
-  });
-
-  restartBtn.addEventListener('click', () => {
-    questions = getRandomQuestions(fullCatalog, 10);
-    currentQuestionIndex = 0;
-    score = 0;
-
-    questionNumberElem.style.display = 'block';
-    questionTextElem.style.display = 'block';
-    optionsForm.style.display = 'block';
-    submitBtn.style.display = 'inline-block';
-    feedbackElem.style.display = 'block';
-    resultElem.style.display = 'none';
-    restartBtn.style.display = 'none';
-
-    loadQuestion();
-  });
-
-  window.onload = () => {
-    questions = getRandomQuestions(fullCatalog, 10);
-    loadQuestion();
-  };
+window.onload = () => {
+  questions = getRandomQuestions(processosModeloCatalog, 10);
+  loadQuestion();
+};
 </script>
 
 </body>
