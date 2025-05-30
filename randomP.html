@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Dinâmico - Seleção Aleatória sobre Modelos de Processo de Software</title>
+<style>
+  body {
+    background: #f4f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  #quiz-container {
+    background: white;
+    max-width: 700px;
+    width: 90%;
+    padding: 30px 40px 40px 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  .question-number {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  label.option {
+    display: block;
+    background: #f0f3f7;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    color: #333;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  label.option:hover {
+    background: #d6e4ff;
+    border-color: #1a73e8;
+  }
+  input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #1a73e8;
+  }
+  button#submit-btn {
+    background: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  button#submit-btn:disabled {
+    background: #a0bff9;
+    cursor: not-allowed;
+  }
+  button#submit-btn:hover:not(:disabled) {
+    background: #145dbf;
+  }
+  #feedback {
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 30px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  #feedback.correct {
+    color: #0f5132;
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+  }
+  #feedback.wrong {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+  }
+  #result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+  #restart-btn {
+    margin-top: 25px;
+    background: #28a745;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #restart-btn:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Quiz Dinâmico - 10 Perguntas Aleatórias</h1>
+  <div class="question-number" id="question-number"></div>
+  <div class="question-text" id="question-text"></div>
+  <form id="options-form" class="options"></form>
+  <button id="submit-btn" disabled>Responder</button>
+  <div id="feedback"></div>
+  <div id="result" style="display:none;"></div>
+  <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
+  <button href="index.html" style="display:none;">Voltar para o menu</button>
+</div>
+
+<script>
+const processosModeloCatalog = [
+  // Cascata
+  { question: "Qual a característica principal do modelo Cascata?", options: {a:"Iterativo", b:"Sequencial e linear", c:"Foco no cliente", d:"Sem documentação"}, answer: "b" },
+  { question: "Para que tipo de projeto o modelo Cascata é indicado?", options: {a:"Requisitos mutáveis", b:"Projetos pequenos", c:"Projetos com requisitos estáveis", d:"Projetos complexos"}, answer: "c" },
+  { question: "No modelo Cascata, quando ocorre a validação do sistema?", options: {a:"Antes do projeto", b:"Durante a codificação", c:"Após a implementação", d:"Nunca"}, answer: "c" },
+  { question: "No modelo Cascata, uma fase só começa após:", options: {a:"Planejamento", b:"Reuniões", c:"Conclusão da fase anterior", d:"Feedback do cliente"}, answer: "c" },
+  { question: "O modelo Cascata tem como desvantagem:", options: {a:"Dificuldade para lidar com mudanças", b:"Entregas rápidas", c:"Alta interação com cliente", d:"Flexibilidade"}, answer: "a" },
+  { question: "No modelo Cascata, os requisitos devem estar:", options: {a:"Estáveis e bem definidos", b:"Flexíveis", c:"Indefinidos", d:"Mutáveis"}, answer: "a" },
+  { question: "No modelo Cascata, a documentação é:", options: {a:"Mínima", b:"Extensa e detalhada", c:"Opcional", d:"Só de código"}, answer: "b" },
+  { question: "O modelo Cascata é mais usado em:", options: {a:"Projetos grandes e bem definidos", b:"Projetos ágeis", c:"Startups", d:"Desenvolvimento rápido"}, answer: "a" },
+  { question: "No modelo Cascata, os testes são realizados:", options: {a:"Após a implementação", b:"Durante o planejamento", c:"No início", d:"Nunca"}, answer: "a" },
+  { question: "No modelo Cascata, o cliente participa:", options: {a:"Só no início para definição de requisitos", b:"Constantemente", c:"Nunca", d:"Só na entrega final"}, answer: "a" },
+
+  // Prototipação Rápida
+  { question: "Qual a finalidade do modelo de Prototipação Rápida?", options: {a:"Entregar versão final", b:"Criar versões preliminares para validar requisitos", c:"Fazer documentação", d:"Codificar direto"}, answer: "b" },
+  { question: "Quando usar Prototipação Rápida?", options: {a:"Quando requisitos não estão claros", b:"Requisitos estáveis", c:"Projetos pequenos", d:"Projetos simples"}, answer: "a" },
+  { question: "O que é protótipo descartável?", options: {a:"Protótipo que vira software final", b:"Protótipo temporário usado para validar requisitos", c:"Protótipo ignorado", d:"Protótipo final"}, answer: "b" },
+  { question: "No modelo de Prototipação Rápida, a participação do cliente é:", options: {a:"Mínima", b:"Constante para feedback", c:"Indiferente", d:"Só no final"}, answer: "b" },
+  { question: "Qual a vantagem do modelo de Prototipação Rápida?", options: {a:"Entrega rápida do produto final", b:"Melhor entendimento dos requisitos", c:"Documentação extensa", d:"Processo sequencial"}, answer: "b" },
+  { question: "A prototipação ajuda a evitar:", options: {a:"Mudanças de requisitos", b:"Erro na definição de requisitos", c:"Codificação", d:"Testes"}, answer: "b" },
+  { question: "Uma desvantagem do modelo de Prototipação Rápida é:", options: {a:"Pode gerar código mal estruturado", b:"Alta documentação", c:"Pouca interação com cliente", d:"Longo tempo de desenvolvimento"}, answer: "a" },
+  { question: "O protótipo no modelo de Prototipação Rápida:", options: {a:"É descartado após validação", b:"É o produto final", c:"Não precisa de revisão", d:"É desenvolvido sem cliente"}, answer: "a" },
+  { question: "No modelo de Prototipação Rápida, a documentação é:", options: {a:"Completa e formal", b:"Reduzida e informal", c:"Inexistente", d:"Excessiva"}, answer: "b" },
+  { question: "Qual modelo é mais indicado quando o cliente não sabe exatamente o que quer?", options: {a:"Cascata", b:"Prototipação Rápida", c:"RAD", d:"Espiral"}, answer: "b" },
+
+  // RAD
+  { question: "O que significa RAD?", options: {a:"Rapid Application Development", b:"Random Agile Development", c:"Reliable Application Design", d:"Rapid Architecture Design"}, answer: "a" },
+  { question: "O modelo RAD é indicado para:", options: {a:"Projetos pequenos com equipe experiente", b:"Projetos complexos", c:"Projetos longos", d:"Projetos com requisitos estáveis"}, answer: "a" },
+  { question: "Qual a característica principal do modelo RAD?", options: {a:"Desenvolvimento rápido e iterativo", b:"Desenvolvimento sequencial", c:"Documentação extensiva", d:"Pouca interação com cliente"}, answer: "a" },
+  { question: "O modelo RAD foca em:", options: {a:"Prototipação e desenvolvimento incremental", b:"Planejamento rígido", c:"Entrega única", d:"Documentação formal"}, answer: "a" },
+  { question: "RAD depende muito de:", options: {a:"Equipe experiente e ferramentas CASE", b:"Plano detalhado", c:"Baixo envolvimento do cliente", d:"Processo cascata"}, answer: "a" },
+  { question: "RAD é mais eficaz quando:", options: {a:"Requisitos estão estáveis", b:"Projeto precisa ser rápido e flexível", c:"Cliente não quer participar", d:"Projeto é grande e complexo"}, answer: "b" },
+  { question: "No RAD, a documentação é:", options: {a:"Reduzida para acelerar desenvolvimento", b:"Muito extensa", c:"Inexistente", d:"Obrigatória"}, answer: "a" },
+  { question: "O modelo RAD utiliza:", options: {a:"Prototipação rápida e iterações", b:"Processo linear", c:"Modelo cascata", d:"Modelo em V"}, answer: "a" },
+  { question: "RAD não é recomendado para:", options: {a:"Projetos pequenos", b:"Projetos de missão crítica com alto risco", c:"Projetos com equipe experiente", d:"Projetos com prazo curto"}, answer: "b" },
+  { question: "Qual a principal desvantagem do modelo RAD?", options: {a:"Alta dependência de equipe qualificada", b:"Entrega lenta", c:"Foco em documentação", d:"Falta de prototipação"}, answer: "a" },
+
+  // Espiral
+  { question: "O que caracteriza o modelo Espiral?", options: {a:"Iterativo com análise de riscos", b:"Sequencial linear", c:"Sem planejamento", d:"Ágil e rápido"}, answer: "a" },
+  { question: "Para que tipo de projeto o modelo Espiral é indicado?", options: {a:"Projetos complexos e de alto risco", b:"Projetos simples", c:"Projetos pequenos", d:"Projetos sem riscos"}, answer: "a" },
+  { question: "Qual a fase principal repetida no modelo Espiral?", options: {a:"Análise de riscos", b:"Codificação", c:"Testes", d:"Documentação"}, answer: "a" },
+  { question: "O modelo Espiral combina:", options: {a:"Iteratividade e análise de risco", b:"Prototipação e cascata", c:"Ágil e cascata", d:"RAD e Scrum"}, answer: "a" },
+  { question: "O modelo Espiral enfatiza:", options: {a:"Avaliação contínua de riscos e planejamento", b:"Entrega rápida", c:"Documentação mínima", d:"Desenvolvimento sequencial"}, answer: "a" },
+  { question: "Quais as vantagens do modelo Espiral?", options: {a:"Flexibilidade para mudanças e controle de riscos", b:"Simplicidade", c:"Sem necessidade de documentação", d:"Pouca interação com cliente"}, answer: "a" },
+  { question: "Desvantagem do modelo Espiral é:", options: {a:"Complexidade e custo elevado", b:"Entrega lenta", c:"Falta de testes", d:"Pouca documentação"}, answer: "a" },
+  { question: "Quantas fases o modelo Espiral possui?", options: {a:"4", b:"2", c:"6", d:"8"}, answer: "a" },
+  { question: "O modelo Espiral é mais utilizado em:", options: {a:"Sistemas grandes e críticos", b:"Projetos pequenos", c:"Aplicações simples", d:"Software de hobby"}, answer: "a" },
+  { question: "O que deve ser feito após cada ciclo no modelo Espiral?", options: {a:"Avaliar riscos e planejar próximo ciclo", b:"Entregar produto final", c:"Encerrar projeto", d:"Testar código"}, answer: "a" },
+
+  // RUP
+  { question: "O que significa RUP?", options: {a:"Rational Unified Process", b:"Rapid Unified Process", c:"Reliable User Process", d:"Random Usage Process"}, answer: "a" },
+  { question: "O modelo RUP é caracterizado por:", options: {a:"Fases bem definidas e iterações", b:"Processo linear rígido", c:"Prototipação rápida", d:"Entrega única"}, answer: "a" },
+  { question: "Para que tipo de projeto o RUP é recomendado?", options: {a:"Projetos grandes e complexos", b:"Projetos simples", c:"Projetos sem equipe", d:"Projetos ágeis"}, answer: "a" },
+  { question: "Quais as quatro fases do RUP?", options: {a:"Iniciação, Elaboração, Construção, Transição", b:"Planejamento, Codificação, Testes, Entrega", c:"Análise, Projeto, Codificação, Testes", d:"Requisitos, Projeto, Implementação, Manutenção"}, answer: "a" },
+  { question: "O RUP permite:", options: {a:"Iterações dentro das fases", b:"Processo linear sem revisões", c:"Entrega única ao final", d:"Sem documentação"}, answer: "a" },
+  { question: "Qual a vantagem do RUP?", options: {a:"Flexibilidade e controle em projetos complexos", b:"Simplicidade", c:"Baixo custo", d:"Processo rápido"}, answer: "a" },
+  { question: "Qual ferramenta é associada ao RUP?", options: {a:"IBM Rational Rose", b:"Visual Studio", c:"Eclipse", d:"NetBeans"}, answer: "a" },
+  { question: "O RUP enfatiza:", options: {a:"Documentação e arquitetura", b:"Codificação rápida", c:"Teste automático", d:"Desenvolvimento informal"}, answer: "a" },
+  { question: "No RUP, a fase de Elaboração tem como foco:", options: {a:"Definir arquitetura do sistema", b:"Entrega final", c:"Testes", d:"Treinamento"}, answer: "a" },
+  { question: "No RUP, a Transição corresponde a:", options: {a:"Implantação e aceitação do sistema", b:"Codificação", c:"Projeto", d:"Manutenção"}, answer: "a" },
+
+  // Ágil (Scrum)
+  { question: "O que caracteriza o modelo Ágil (Scrum)?", options: {a:"Iterações rápidas com foco no cliente", b:"Processo sequencial rígido", c:"Entrega única", d:"Documentação extensa"}, answer: "a" },
+  { question: "Qual o objetivo das iterações no Scrum?", options: {a:"Entrega incremental e feedback constante", b:"Planejamento detalhado", c:"Teste único no final", d:"Documentação formal"}, answer: "a" },
+  { question: "Qual o papel do Product Owner no Scrum?", options: {a:"Gerenciar backlog e prioridades", b:"Codificar", c:"Testar software", d:"Gerenciar infraestrutura"}, answer: "a" },
+  { question: "O que é o Scrum Master?", options: {a:"Facilitador e removedor de impedimentos", b:"Líder do time", c:"Gerente de projeto tradicional", d:"Cliente"}, answer: "a" },
+  { question: "O que é um Sprint no Scrum?", options: {a:"Período curto de trabalho focado", b:"Reunião mensal", c:"Documento de requisitos", d:"Versão final"}, answer: "a" },
+  { question: "O que é backlog no Scrum?", options: {a:"Lista priorizada de tarefas", b:"Código-fonte", c:"Manual do usuário", d:"Relatório financeiro"}, answer: "a" },
+  { question: "Como o Scrum lida com mudanças?", options: {a:"Permite adaptação a cada sprint", b:"Não aceita mudanças", c:"Aceita mudanças só no início", d:"Aceita mudanças só no final"}, answer: "a" },
+  { question: "Qual a duração típica de um sprint?", options: {a:"1 a 4 semanas", b:"6 meses", c:"1 ano", d:"Indefinida"}, answer: "a" },
+  { question: "Qual a função das reuniões diárias (Daily Scrum)?", options: {a:"Alinhar equipe e identificar impedimentos", b:"Testar software", c:"Planejar projeto", d:"Treinar equipe"}, answer: "a" },
+  { question: "O que é Definition of Done (Definição de Pronto)?", options: {a:"Critérios que definem quando uma tarefa está completa", b:"Plano de projeto", c:"Reunião", d:"Teste manual"}, answer: "a" }
+];
+
+
+
+
+  function getRandomQuestions(catalog, n) {
+    const shuffled = catalog
+      .map(value => ({ value, sort: Math.random() }))
+      .sort((a,b) => a.sort - b.sort)
+      .map(({value}) => value);
+    return shuffled.slice(0, n);
+  }
+
+  let questions = [];
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  const questionNumberElem = document.getElementById('question-number');
+  const questionTextElem = document.getElementById('question-text');
+  const optionsForm = document.getElementById('options-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedbackElem = document.getElementById('feedback');
+  const resultElem = document.getElementById('result');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function loadQuestion() {
+    submitBtn.disabled = true;
+    feedbackElem.textContent = '';
+    feedbackElem.className = '';
+    const q = questions[currentQuestionIndex];
+    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
+    questionTextElem.textContent = q.question;
+
+    optionsForm.innerHTML = '';
+    for (const [key, optionText] of Object.entries(q.options)) {
+      const optionHTML = `
+        <label class="option">
+          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+        </label>
+      `;
+      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+    }
+
+    const inputs = optionsForm.querySelectorAll('input[name="option"]');
+    inputs.forEach(input => {
+      input.checked = false;
+      input.disabled = false;
+      input.addEventListener('change', () => {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    resultElem.style.display = 'block';
+    resultElem.textContent = `Você acertou ${score} de ${questions.length} questões.`;
+
+    restartBtn.style.display = 'block';
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+    if (!selectedOption) return;
+
+    const answer = selectedOption.value;
+    const q = questions[currentQuestionIndex];
+    if (answer === q.answer) {
+      score++;
+      feedbackElem.textContent = "Resposta correta!";
+      feedbackElem.className = "correct";
+    } else {
+      feedbackElem.textContent = `Errado! A resposta correta é: ${q.answer}) ${q.options[q.answer]}`;
+      feedbackElem.className = "wrong";
+    }
+    submitBtn.disabled = true;
+    optionsForm.querySelectorAll('input[name="option"]').forEach(i => i.disabled = true);
+
+    setTimeout(() => {
+      feedbackElem.textContent = '';
+      feedbackElem.className = '';
+      nextQuestion();
+    }, 2500);
+  });
+
+  restartBtn.addEventListener('click', () => {
+    questions = getRandomQuestions(fullCatalog, 10);
+    currentQuestionIndex = 0;
+    score = 0;
+
+    questionNumberElem.style.display = 'block';
+    questionTextElem.style.display = 'block';
+    optionsForm.style.display = 'block';
+    submitBtn.style.display = 'inline-block';
+    feedbackElem.style.display = 'block';
+    resultElem.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    loadQuestion();
+  });
+
+  window.onload = () => {
+    questions = getRandomQuestions(fullCatalog, 10);
+    loadQuestion();
+  };
+</script>
+
+</body>
+</html>
