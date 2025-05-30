@@ -208,14 +208,11 @@
       explanation: "Prototipação é usada para elicitar e validar requisitos no início do projeto."
     },
     {
-      question: "Questão 7: Associe as características a modelos de ciclo de vida:",
+      question: "Questão 7: Qual associe as características a modelos de ciclo de vida:",
       options: {
-        a: "Planos de teste antes da implementação.",
-        b: "Permite alterar etapa anterior.",
-        c: "Ambientes estruturados e mudanças caras.",
-        d: "Inclui análise de risco e prototipação."
+        a: "1) Preconiza que o início da elaboração dos planos de teste deve ocorrer antes da etapa de implementação.\n3) Permite alterar o resultado de uma etapa anterior.\n4) É baseado em ambientes físicos altamente estruturados, em que depois de uma ação as mudanças são proibitivamente caras.\n2) Inclui explicitamente análise de riscos e prototipação."
       },
-      answer: "1- a, 3- b, 4- c, 2- d",
+      answer: "a",
       explanation: "Modelo cascata (1) inicia planos de teste cedo; Modelo iterativo (3) permite alterações; Modelo V (4) tem ambientes rígidos; Modelo espiral (2) usa análise de riscos."
     },
     {
@@ -277,47 +274,54 @@
     questionTextElem.textContent = q.question;
 
     optionsForm.innerHTML = '';
-    for (const [key, optionText] of Object.entries(q.options)) {
-      const optionHTML = `
-        <label class="option">
-          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
-        </label>
-      `;
-      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
-    }
 
-    optionsForm.querySelectorAll('input[name="option"]').forEach(input => {
-      input.addEventListener('change', () => {
-        submitBtn.disabled = false;
-      });
-    });
-  }
-
-  function showResult() {
-    questionNumberElem.style.display = 'none';
-    questionTextElem.style.display = 'none';
-    optionsForm.style.display = 'none';
-    submitBtn.style.display = 'none';
-    feedbackElem.style.display = 'none';
-
-    const grade = (score / totalQuestions) * 10;
-    resultElem.style.display = 'block';
-    restartBtn.style.display = 'block';
-
-    let msg = `Você acertou ${score} de ${totalQuestions} questões. Nota: ${grade.toFixed(1)}/10.\n`;
-
-    if (grade >= 7) {
-      msg += " Parabéns, você foi bem!";
-    } else if (grade >= 5) {
-      msg += " Resultado razoável, mas dá para melhorar!";
+    // Para questão 7 (índice 6) mostrar texto da associação e habilitar botão
+    if (currentQuestionIndex === 6) {
+      const p = document.createElement('p');
+      p.style.whiteSpace = 'pre-wrap';
+      p.style.fontSize = '17px';
+      p.style.color = '#333';
+      p.textContent = q.options.a;
+      optionsForm.appendChild(p);
+      submitBtn.disabled = false;
     } else {
-      msg += " Precisa estudar mais, mas não desista!";
+      for (const [key, optionText] of Object.entries(q.options)) {
+        const optionHTML = `
+          <label class="option">
+            <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+          </label>
+        `;
+        optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+      }
+      optionsForm.querySelectorAll('input[name="option"]').forEach(input => {
+        input.disabled = false;
+        input.checked = false;
+        input.addEventListener('change', () => {
+          submitBtn.disabled = false;
+        });
+      });
+      submitBtn.disabled = true;
     }
-
-    resultElem.textContent = msg;
   }
 
   submitBtn.addEventListener('click', () => {
+    // Questão 7: conta como correta e avança
+    if (currentQuestionIndex === 6) {
+      score++;
+      feedbackElem.textContent = "Questão de associação - resposta considerada correta.";
+      feedbackElem.className = "correct";
+      submitBtn.disabled = true;
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+          loadQuestion();
+        } else {
+          showResult();
+        }
+      }, 3000);
+      return;
+    }
+
     const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
     if (!selectedOption) {
       alert('Selecione uma opção antes de enviar!');
@@ -352,6 +356,30 @@
       }
     }, 4000);
   });
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    const grade = (score / totalQuestions) * 10;
+    resultElem.style.display = 'block';
+    restartBtn.style.display = 'block';
+
+    let msg = `Você acertou ${score} de ${totalQuestions} questões. Nota: ${grade.toFixed(1)}/10.\n`;
+
+    if (grade >= 7) {
+      msg += " Parabéns, você foi bem!";
+    } else if (grade >= 5) {
+      msg += " Resultado razoável, mas dá para melhorar!";
+    } else {
+      msg += " Precisa estudar mais, mas não desista!";
+    }
+
+    resultElem.textContent = msg;
+  }
 
   restartBtn.addEventListener('click', () => {
     currentQuestionIndex = 0;
