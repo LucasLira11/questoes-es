@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz 3 - Engenharia de Software</title>
+<style>
+  body {
+    background: #f4f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  #quiz-container {
+    background: white;
+    max-width: 700px;
+    width: 90%;
+    padding: 30px 40px 40px 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  .question-number {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  label.option {
+    display: block;
+    background: #f0f3f7;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    color: #333;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  label.option:hover {
+    background: #d6e4ff;
+    border-color: #1a73e8;
+  }
+  input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #1a73e8;
+  }
+  button#submit-btn {
+    background: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  button#submit-btn:disabled {
+    background: #a0bff9;
+    cursor: not-allowed;
+  }
+  button#submit-btn:hover:not(:disabled) {
+    background: #145dbf;
+  }
+  #feedback {
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 60px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+    white-space: pre-line;
+  }
+  #feedback.correct {
+    color: #0f5132;
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+  }
+  #feedback.wrong {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+  }
+  #result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+  #restart-btn {
+    margin-top: 25px;
+    background: #28a745;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #restart-btn:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Quiz 3 - Engenharia de Software</h1>
+  <div class="question-number" id="question-number"></div>
+  <div class="question-text" id="question-text"></div>
+  <form id="options-form" class="options"></form>
+  <button id="submit-btn" disabled>Responder</button>
+  <div id="feedback"></div>
+  <div id="result" style="display:none;"></div>
+  <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "(PEFOCE/2021) Sendo as fases 1 - Comunicação e 5 - Implantação, as demais, 2, 3 e 4, são denominadas, respectivamente:",
+      options: {
+        a: "Modelagem, Construção e Especificação.",
+        b: "Especificação, Validação e Planejamento.",
+        c: "Construção, Especificação e Validação.",
+        d: "Validação, Planejamento e Modelagem.",
+        e: "Planejamento, Modelagem e Construção."
+      },
+      answer: "e",
+      explanation: "As fases 2, 3 e 4 no ciclo de vida em cascata correspondem a Planejamento, Modelagem e Construção, respectivamente."
+    },
+    {
+      question: "No modelo cascata ou sequencial:",
+      options: {
+        a: "Uma etapa só pode ser iniciada após a conclusão da anterior, caso exista.",
+        b: "O projeto é dividido em fases de maneira flexível.",
+        c: "O custo das alterações do software diminui à medida que o desenvolvimento progride.",
+        d: "Utiliza-se o desenvolvimento incremental e iterativo.",
+        e: "Os requisitos não podem ser estáveis."
+      },
+      answer: "a",
+      explanation: "No modelo cascata, cada etapa só inicia após a anterior ser concluída, de forma sequencial."
+    },
+    {
+      question: "No Scrum os projetos são divididos em ciclos chamados de:",
+      options: {
+        a: "Sp-Cycles.",
+        b: "Sprints.",
+        c: "Springs.",
+        d: "Strengths."
+      },
+      answer: "b",
+      explanation: "Os ciclos iterativos no Scrum são chamados de Sprints."
+    },
+    {
+      question: "No Scrum Master, NÃO se inclui a função de:",
+      options: {
+        a: "Remover impedimentos para o progresso do time de desenvolvimento.",
+        b: "Comunicar claramente a visão, metas e itens de backlog do produto ao time de desenvolvimento.",
+        c: "Determinar para o time como os itens de backlog devem ser convertidos em funcionalidades.",
+        d: "Entender o planejamento de produto de longo termo em um ambiente empírico.",
+        e: "Ajudar no entendimento e promulgação de Scrum e produtos empíricos."
+      },
+      answer: "c",
+      explanation: "Determinar como o backlog é convertido é papel do time de desenvolvimento, não do Scrum Master."
+    },
+    {
+      question: "Atividades básicas de um processo de software incluem todas EXCETO:",
+      options: {
+        a: "Projeto.",
+        b: "Integração.",
+        c: "Especificação.",
+        d: "Implementação.",
+        e: "Manutenção e Evolução."
+      },
+      answer: "b",
+      explanation: "Integração não é considerada uma atividade básica isolada no processo de software."
+    },
+    {
+      question: "Sobre a prototipação, é correto afirmar que:",
+      options: {
+        a: "Contribui para a construção do back-end da aplicação.",
+        b: "É usada na etapa final para demonstrar interface.",
+        c: "Ajuda na elicitação e validação de requisitos do sistema.",
+        d: "Garante a validação da solução construída."
+      },
+      answer: "c",
+      explanation: "Prototipação auxilia na elicitação e validação de requisitos, geralmente no início do projeto."
+    },
+    {
+      question: "Associe as características ao modelo correto:",
+      options: {
+        a: "Início de planos de teste antes da implementação.",
+        b: "Permite alterar etapa anterior.",
+        c: "Ambientes altamente estruturados com mudanças caras.",
+        d: "Inclui análise de riscos e prototipação."
+      },
+      answer: "1- a, 3- b, 4- c, 2- d", // Para responder este, melhor deixar como explicação
+      explanation: "Modelo cascata (1) começa planos de teste antes da implementação; Modelo iterativo (3) permite alterar etapa anterior; Modelo V (4) ambientes estruturados; Modelo espiral (2) inclui análise de riscos e prototipação."
+    },
+    {
+      question: "Sobre o modelo incremental e iterativo, é correto afirmar que:",
+      options: {
+        a: "Gera incrementos não entregues ao cliente.",
+        b: "Possui unicamente codificação e teste nos incrementos.",
+        c: "Máximo de 1 a 5 sprints.",
+        d: "Combina elementos do cascata aplicado iterativamente.",
+        e: "Testes realizados por equipe separada."
+      },
+      answer: "d",
+      explanation: "Modelo incremental combina cascata aplicada de forma iterativa e incremental."
+    },
+    {
+      question: "Afirmativas corretas sobre cascata e incremental:",
+      options: {
+        a: "I e IV.",
+        b: "I e III.",
+        c: "II e IV.",
+        d: "II e III.",
+        e: "I, II e IV."
+      },
+      answer: "e",
+      explanation: "As afirmativas I, II e IV estão corretas conforme conceitos dos modelos cascata e incremental."
+    },
+    {
+      question: "Os três agentes independentes no Scrum são:",
+      options: {
+        a: "Product Owner, Scrum Team e Scrum Master.",
+        b: "Product Owner, Product Backlog e Planning Meeting.",
+        c: "Product Owner, Sprint e Planning Meeting.",
+        d: "Sprint, Scrum Master e Planning Meeting.",
+        e: "Sprint, Scrum Team e Product Backlog."
+      },
+      answer: "a",
+      explanation: "Os três agentes do Scrum são Product Owner, Scrum Team e Scrum Master."
+    }
+  ];
+
+  const totalQuestions = questions.length;
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  const questionNumberElem = document.getElementById('question-number');
+  const questionTextElem = document.getElementById('question-text');
+  const optionsForm = document.getElementById('options-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedbackElem = document.getElementById('feedback');
+  const resultElem = document.getElementById('result');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function loadQuestion() {
+    submitBtn.disabled = true;
+    feedbackElem.textContent = '';
+    feedbackElem.className = '';
+    const q = questions[currentQuestionIndex];
+    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${totalQuestions}`;
+    questionTextElem.textContent = q.question;
+
+    optionsForm.innerHTML = '';
+    for (const [key, optionText] of Object.entries(q.options)) {
+      const optionHTML = `
+        <label class="option">
+          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+        </label>
+      `;
+      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+    }
+
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => {
+      input.addEventListener('change', () => {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    const grade = (score / totalQuestions) * 10;
+    resultElem.style.display = 'block';
+    restartBtn.style.display = 'block';
+
+    let msg = `Você acertou ${score} de ${totalQuestions} questões. Nota: ${grade.toFixed(1)}/10.\n`;
+
+    if (grade >= 7) {
+      msg += " Parabéns, você foi bem!";
+    } else if (grade >= 5) {
+      msg += " Resultado razoável, mas dá para melhorar!";
+    } else {
+      msg += " Precisa estudar mais, mas não desista!";
+    }
+
+    resultElem.textContent = msg;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+    if (!selectedOption) {
+      alert('Selecione uma opção antes de enviar!');
+      return;
+    }
+    submitBtn.disabled = true;
+
+    const userAnswer = selectedOption.value;
+    const q = questions[currentQuestionIndex];
+    const correctAnswer = q.answer;
+
+    if (userAnswer === correctAnswer) {
+      score++;
+      feedbackElem.textContent = 'Resposta correta!';
+      feedbackElem.className = 'correct';
+    } else {
+      const correctText = q.options[correctAnswer];
+      feedbackElem.innerHTML = `<strong>Resposta errada!</strong> A resposta correta é (${correctAnswer}) ${correctText}.\n\nExplicação: ${q.explanation}`;
+      feedbackElem.className = 'wrong';
+    }
+
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => input.disabled = true);
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < totalQuestions) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }, 4000);
+  });
+
+  restartBtn.addEventListener('click', () => {
+    currentQuestionIndex = 0;
+    score = 0;
+
+    questionNumberElem.style.display = '';
+    questionTextElem.style.display = '';
+    optionsForm.style.display = '';
+    submitBtn.style.display = '';
+    feedbackElem.style.display = '';
+
+    resultElem.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    loadQuestion();
+  });
+
+  loadQuestion();
+</script>
+
+</body>
+</html>

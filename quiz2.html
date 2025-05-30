@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz 2 - Engenharia de Software</title>
+<style>
+  body {
+    background: #f4f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  #quiz-container {
+    background: white;
+    max-width: 700px;
+    width: 90%;
+    padding: 30px 40px 40px 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  .question-number {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  label.option {
+    display: block;
+    background: #f0f3f7;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    color: #333;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  label.option:hover {
+    background: #d6e4ff;
+    border-color: #1a73e8;
+  }
+  input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #1a73e8;
+  }
+  button#submit-btn {
+    background: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  button#submit-btn:disabled {
+    background: #a0bff9;
+    cursor: not-allowed;
+  }
+  button#submit-btn:hover:not(:disabled) {
+    background: #145dbf;
+  }
+  #feedback {
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 30px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  #feedback.correct {
+    color: #0f5132;
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+  }
+  #feedback.wrong {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+  }
+  #result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+  #restart-btn {
+    margin-top: 25px;
+    background: #28a745;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #restart-btn:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Quiz 2 - Engenharia de Software</h1>
+  <div class="question-number" id="question-number"></div>
+  <div class="question-text" id="question-text"></div>
+  <form id="options-form" class="options"></form>
+  <button id="submit-btn" disabled>Responder</button>
+  <div id="feedback"></div>
+  <div id="result" style="display:none;"></div>
+  <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "Qual é o principal componente do software?",
+      options: {
+        a: "Hardware.",
+        b: "Estruturas de dados, programas e documentação.",
+        c: "Sistemas operacionais.",
+        d: "Redes de computadores."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que caracteriza um software embarcado?",
+      options: {
+        a: "Software usado apenas em computadores pessoais.",
+        b: "Software incorporado a dispositivos como micro-ondas e sensores.",
+        c: "Aplicações que não precisam de conexão com a internet.",
+        d: "Sistemas operacionais de servidor."
+      },
+      answer: "b"
+    },
+    {
+      question: "Por que o desenvolvimento de software é considerado difícil?",
+      options: {
+        a: "Porque não existe documentação.",
+        b: "Devido à mudança constante dos requisitos e dificuldades na estimativa de tempo e custo.",
+        c: "Porque o código-fonte é sempre complexo.",
+        d: "Por causa da falta de hardware moderno."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual atividade NÃO faz parte da engenharia de software?",
+      options: {
+        a: "Especificação de requisitos.",
+        b: "Projeto e implementação.",
+        c: "Criação de manuais do usuário.",
+        d: "Desenvolvimento do hardware."
+      },
+      answer: "d"
+    },
+    {
+      question: "Em qual fase do processo de software se verifica se o produto está correto e atende às necessidades?",
+      options: {
+        a: "Validação.",
+        b: "Especificação.",
+        c: "Projeto.",
+        d: "Implementação."
+      },
+      answer: "a"
+    },
+    {
+      question: "O que significa \"processo de software\"?",
+      options: {
+        a: "A maneira de se executar operações em software sem regras.",
+        b: "Conjunto organizado de atividades para desenvolver um produto de software.",
+        c: "Processo de instalação do software.",
+        d: "Apenas a codificação."
+      },
+      answer: "b"
+    },
+    {
+      question: "O modelo RAD (Rapid Application Development) é mais adequado para:",
+      options: {
+        a: "Projetos pequenos com equipes experientes e escopo controlado.",
+        b: "Projetos grandes que não podem ser divididos.",
+        c: "Projetos sem necessidade de interação com o cliente.",
+        d: "Sistemas em tempo real."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual dos seguintes NÃO é um nível de maturidade do SW-CMM?",
+      options: {
+        a: "Inicial.",
+        b: "Repetível.",
+        c: "Otimização.",
+        d: "Desorganizado."
+      },
+      answer: "d"
+    },
+    {
+      question: "Qual é o papel principal do Product Owner no Scrum?",
+      options: {
+        a: "Desenvolver código.",
+        b: "Representar os interesses do cliente e gerenciar prioridades do produto.",
+        c: "Testar o software.",
+        d: "Gerenciar a infraestrutura do servidor."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual das opções representa uma característica do modelo em cascata?",
+      options: {
+        a: "Iterações rápidas e entregas incrementais.",
+        b: "Processo linear e sequencial com etapas bem definidas.",
+        c: "Desenvolvimento baseado em protótipos descartáveis.",
+        d: "Processo baseado em análise de risco constante."
+      },
+      answer: "b"
+    },
+    {
+      question: "Por que o modelo espiral é considerado adequado para projetos complexos?",
+      options: {
+        a: "Porque não tem análise de risco.",
+        b: "Porque mistura iteratividade com análise de riscos e permite adaptação.",
+        c: "Porque elimina a necessidade de documentação.",
+        d: "Porque não requer interação com o cliente."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que é \"formalidade\" na engenharia de software?",
+      options: {
+        a: "Uso de ferramentas caras no desenvolvimento.",
+        b: "Documentação que reduz inconsistências e erros de comunicação.",
+        c: "Processo de codificação rápida.",
+        d: "Estrutura rígida de programação."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que significa \"flexibilização\" no contexto da engenharia de software?",
+      options: {
+        a: "Documentação detalhada.",
+        b: "Capacidade de um sistema se adaptar facilmente a mudanças.",
+        c: "Processo de testes automatizados.",
+        d: "Divisão do projeto em várias equipes."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que é \"generalização\" na engenharia de software?",
+      options: {
+        a: "Dividir o sistema em pequenos módulos.",
+        b: "Reutilização de componentes para reduzir custos de desenvolvimento.",
+        c: "Uso exclusivo de linguagens genéricas.",
+        d: "Projeto sem documentação."
+      },
+      answer: "b"
+    },
+    {
+      question: "Quais são os principais problemas enfrentados no desenvolvimento de software?",
+      options: {
+        a: "Recursos ilimitados e prazos flexíveis.",
+        b: "Requisitos incompletos, falta de envolvimento do usuário, cronogramas imprecisos e manutenção difícil.",
+        c: "Fácil estimativa de custos e alta produtividade.",
+        d: "Falta de ferramentas modernas e equipe reduzida."
+      },
+      answer: "b"
+    },
+    {
+      question: "No processo de software, o que é um \"artefato\"?",
+      options: {
+        a: "Um software acabado.",
+        b: "Um documento, programa ou mudança mensurável que é saída de uma atividade.",
+        c: "Um equipamento utilizado na codificação.",
+        d: "Um bug identificado no software."
+      },
+      answer: "b"
+    },
+    {
+      question: "Em qual modelo o protótipo pode ser descartado após ser usado para elicitar requisitos?",
+      options: {
+        a: "Cascata.",
+        b: "Prototipação rápida.",
+        c: "RAD.",
+        d: "Espiral."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que significa \"especificação de requisitos\"?",
+      options: {
+        a: "Definição detalhada do que o sistema deve fazer.",
+        b: "Desenvolvimento de protótipos.",
+        c: "Codificação de funcionalidades.",
+        d: "Testes unitários."
+      },
+      answer: "a"
+    },
+    {
+      question: "O que é necessário para validar os requisitos?",
+      options: {
+        a: "Prototipação, revisão com stakeholders e assinatura do documento.",
+        b: "Codificação rápida e testes finais.",
+        c: "Aprovação do gerente de projeto apenas.",
+        d: "Entrega do software para o cliente sem revisão."
+      },
+      answer: "a"
+    },
+    {
+      question: "Quais são as principais atividades da fase de manutenção do software?",
+      options: {
+        a: "Desenvolvimento de novas funcionalidades sem alterar o sistema.",
+        b: "Analisar novas tecnologias, alterar requisitos, propor e implementar mudanças no sistema.",
+        c: "Apenas correção de bugs sem documentação.",
+        d: "Encerrar o projeto e arquivar o código-fonte."
+      },
+      answer: "b"
+    },
+    {
+      question: "Por que a arquitetura de software é importante?",
+      options: {
+        a: "Porque determina a organização, componentes e custo do sistema.",
+        b: "Porque define apenas o layout da interface do usuário.",
+        c: "Porque elimina a necessidade de documentação.",
+        d: "Porque substitui o projeto detalhado do software."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual dos seguintes é um conector em arquitetura de software?",
+      options: {
+        a: "Banco de dados.",
+        b: "Chamadas de rotina ou variáveis compartilhadas que conectam componentes.",
+        c: "Documentação do sistema.",
+        d: "O hardware onde o software roda."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual é a característica do modelo RUP?",
+      options: {
+        a: "Não utiliza iterações.",
+        b: "Possui fases bem definidas e iterações, adequado para projetos grandes e controlados.",
+        c: "É um modelo simples e linear.",
+        d: "Não possui divisão em fases."
+      },
+      answer: "b"
+    },
+    {
+      question: "No processo ágil, qual é a prioridade maior?",
+      options: {
+        a: "Documentação completa e detalhada.",
+        b: "Entregar software funcionando frequentemente e responder rapidamente às mudanças.",
+        c: "Planejar tudo com antecedência sem mudanças.",
+        d: "Minimizar a comunicação com o cliente."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual a diferença entre validação e verificação de software?",
+      options: {
+        a: "Validação assegura que o software está sendo construído corretamente; verificação que o software atende às necessidades do usuário.",
+        b: "Validação assegura que o software atende às necessidades do usuário; verificação assegura que o software está correto conforme especificações.",
+        c: "Validação é feita somente no final do projeto; verificação é feita durante o projeto.",
+        d: "Não existe diferença entre validação e verificação."
+      },
+      answer: "b"
+    }
+  ];
+
+  const totalQuestions = questions.length;
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  const questionNumberElem = document.getElementById('question-number');
+  const questionTextElem = document.getElementById('question-text');
+  const optionsForm = document.getElementById('options-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedbackElem = document.getElementById('feedback');
+  const resultElem = document.getElementById('result');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function loadQuestion() {
+    submitBtn.disabled = true;
+    feedbackElem.textContent = '';
+    feedbackElem.className = '';
+    const q = questions[currentQuestionIndex];
+    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${totalQuestions}`;
+    questionTextElem.textContent = q.question;
+
+    optionsForm.innerHTML = '';
+    for (const [key, optionText] of Object.entries(q.options)) {
+      const optionHTML = `
+        <label class="option">
+          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+        </label>
+      `;
+      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+    }
+
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => {
+      input.addEventListener('change', () => {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    const grade = (score / totalQuestions) * 10;
+    resultElem.style.display = 'block';
+    restartBtn.style.display = 'block';
+
+    let msg = `Você acertou ${score} de ${totalQuestions} questões. Nota: ${grade.toFixed(1)}/10.\n`;
+
+    if (grade >= 7) {
+      msg += " Parabéns, você foi bem!";
+    } else if (grade >= 5) {
+      msg += " Resultado razoável, mas dá para melhorar!";
+    } else {
+      msg += " Precisa estudar mais, mas não desista!";
+    }
+
+    resultElem.textContent = msg;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+    if (!selectedOption) {
+      alert('Selecione uma opção antes de enviar!');
+      return;
+    }
+    submitBtn.disabled = true;
+
+    const userAnswer = selectedOption.value;
+    const correctAnswer = questions[currentQuestionIndex].answer;
+
+    if (userAnswer === correctAnswer) {
+      score++;
+      feedbackElem.textContent = 'Resposta correta!';
+      feedbackElem.className = 'correct';
+    } else {
+      const correctText = questions[currentQuestionIndex].options[correctAnswer];
+      feedbackElem.textContent = `Resposta errada! A resposta correta é (${correctAnswer}) ${correctText}.`;
+      feedbackElem.className = 'wrong';
+    }
+
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => input.disabled = true);
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < totalQuestions) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }, 2000);
+  });
+
+  restartBtn.addEventListener('click', () => {
+    currentQuestionIndex = 0;
+    score = 0;
+
+    questionNumberElem.style.display = '';
+    questionTextElem.style.display = '';
+    optionsForm.style.display = '';
+    submitBtn.style.display = '';
+    feedbackElem.style.display = '';
+
+    resultElem.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    loadQuestion();
+  });
+
+  loadQuestion();
+</script>
+
+</body>
+</html>

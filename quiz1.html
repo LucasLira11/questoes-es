@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Engenharia de Software - 35 Questões</title>
+<style>
+  body {
+    background: #f4f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  #quiz-container {
+    background: white;
+    max-width: 700px;
+    width: 90%;
+    padding: 30px 40px 40px 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  .question-number {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  label.option {
+    display: block;
+    background: #f0f3f7;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    color: #333;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  label.option:hover {
+    background: #d6e4ff;
+    border-color: #1a73e8;
+  }
+  input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #1a73e8;
+  }
+  button#submit-btn {
+    background: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  button#submit-btn:disabled {
+    background: #a0bff9;
+    cursor: not-allowed;
+  }
+  button#submit-btn:hover:not(:disabled) {
+    background: #145dbf;
+  }
+  #feedback {
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 30px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  #feedback.correct {
+    color: #0f5132;
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+  }
+  #feedback.wrong {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+  }
+  #result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+  #restart-btn {
+    margin-top: 25px;
+    background: #28a745;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #restart-btn:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Quiz de Engenharia de Software</h1>
+  <div class="question-number" id="question-number"></div>
+  <div class="question-text" id="question-text"></div>
+  <form id="options-form" class="options"></form>
+  <button id="submit-btn" disabled>Responder</button>
+  <div id="feedback"></div>
+  <div id="result" style="display:none;"></div>
+  <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "O que é software?",
+      options: {
+        a: "Apenas código-fonte de um programa.",
+        b: "Um conjunto de programas, estruturas de dados e documentação que executam tarefas específicas em sistemas computacionais.",
+        c: "Somente programas embarcados em dispositivos eletrônicos.",
+        d: "Um sistema operacional."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual das alternativas NÃO é um tipo de software?",
+      options: {
+        a: "Software básico (ex.: sistema operacional)",
+        b: "Software comercial (ex.: ERP, CRM)",
+        c: "Software temporário (ex.: documentos provisórios)",
+        d: "Software embarcado (ex.: micro-ondas, sensores)"
+      },
+      answer: "c"
+    },
+    {
+      question: "Quais são problemas comuns no desenvolvimento de software?",
+      options: {
+        a: "Falta de hardware moderno, documentação extensa e excesso de testes.",
+        b: "Mudança constante de requisitos, subestimativas de tempo e custo, falta de envolvimento do usuário e manutenção difícil.",
+        c: "Mudança constante de requisitos, excesso de dinheiro, muita equipe e tempo sobrando.",
+        d: "Nenhuma das alternativas acima."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual o objetivo principal da Engenharia de Software?",
+      options: {
+        a: "Criar software o mais rápido possível, independente da qualidade.",
+        b: "Garantir qualidade, eficiência e facilidade de manutenção no desenvolvimento de software.",
+        c: "Apenas desenvolver softwares embarcados.",
+        d: "Reduzir custos excluindo documentação."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que caracteriza o modelo de processo em cascata?",
+      options: {
+        a: "Processo iterativo, com entregas contínuas e foco no cliente.",
+        b: "Processo sequencial, ideal para projetos com requisitos estáveis.",
+        c: "Processo baseado em prototipação rápida, para clientes que não sabem o que querem.",
+        d: "Processo baseado em análise de risco e espiral."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual modelo de processo é indicado para projetos complexos e envolve análise de risco?",
+      options: {
+        a: "Cascata",
+        b: "RAD",
+        c: "Espiral",
+        d: "Ágil (Scrum)"
+      },
+      answer: "c"
+    },
+    {
+      question: "Em relação à ética na Engenharia de Software, qual das afirmações abaixo está correta?",
+      options: {
+        a: "É aceitável usar habilidades técnicas para acessar computadores de terceiros, desde que sem intenções maléficas.",
+        b: "A confidencialidade de empregadores e clientes deve ser respeitada.",
+        c: "Não é necessário conhecer leis sobre propriedade intelectual para o desenvolvimento de software.",
+        d: "Aceitar trabalhos fora da sua área de competência é normal e esperado."
+      },
+      answer: "b"
+    },
+    {
+      question: "Sobre os conceitos da Engenharia de Software, a \"abstração\" refere-se a:",
+      options: {
+        a: "Lidar com detalhes minuciosos e complexos do código.",
+        b: "Visão do todo, especificação dos requisitos do sistema.",
+        c: "A documentação excessiva e detalhada do projeto.",
+        d: "Processo de teste automatizado."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que significa \"decomposição\" na Engenharia de Software?",
+      options: {
+        a: "Dividir o sistema em partes menores para lidar com a complexidade.",
+        b: "Remover código inútil do projeto.",
+        c: "Reescrever o código em outra linguagem.",
+        d: "Otimizar o banco de dados."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual dos seguintes é um mito comum sobre Engenharia de Software?",
+      options: {
+        a: "Adicionar mais programadores sempre resolve atrasos no cronograma.",
+        b: "Documentação formal reduz inconsistências e erros de comunicação.",
+        c: "Iterações rápidas facilitam mudanças em requisitos.",
+        d: "Software comercial é usado para ERP e CRM."
+      },
+      answer: "a"
+    },
+    {
+      question: "O modelo Ágil (Scrum) é recomendado para projetos:",
+      options: {
+        a: "Com requisitos mutáveis e foco na entrega contínua ao cliente.",
+        b: "Com requisitos fixos e definidos desde o início.",
+        c: "Que precisam de documentação extensa e formal.",
+        d: "Que não envolvem clientes."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual das alternativas representa uma prática ética correta na Engenharia de Software?",
+      options: {
+        a: "Compartilhar códigos-fonte do cliente com terceiros para acelerar o projeto.",
+        b: "Manter segredo sobre vulnerabilidades descobertas no sistema sem informar o cliente.",
+        c: "Respeitar as leis de patentes e direitos autorais durante o desenvolvimento.",
+        d: "Aceitar projetos para os quais não possui conhecimento suficiente."
+      },
+      answer: "c"
+    },
+    // Agora adiciono mais 23 perguntas para totalizar 35:
+    {
+      question: "Qual a fase do processo de software responsável por validar o sistema desenvolvido?",
+      options: {
+        a: "Especificação",
+        b: "Projeto",
+        c: "Validação (testes)",
+        d: "Evolução"
+      },
+      answer: "c"
+    },
+    {
+      question: "O que significa o termo 'flexibilização' na engenharia de software?",
+      options: {
+        a: "O software é aberto a mudanças e fácil de adaptar.",
+        b: "O software possui muitas restrições para evitar erros.",
+        c: "O software não aceita nenhuma alteração após a implementação.",
+        d: "O software deve ser completamente refeito a cada mudança."
+      },
+      answer: "a"
+    },
+    {
+      question: "No modelo RAD, qual é a característica principal?",
+      options: {
+        a: "Desenvolvimento rápido com equipe experiente e projetos pequenos.",
+        b: "Desenvolvimento sequencial rígido.",
+        c: "Foco na análise de risco constante.",
+        d: "Entrega contínua e iterações rápidas."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual dessas atividades não faz parte da Engenharia de Software?",
+      options: {
+        a: "Especificação de requisitos",
+        b: "Projeto",
+        c: "Marketing do produto",
+        d: "Manutenção"
+      },
+      answer: "c"
+    },
+    {
+      question: "Qual o principal desafio associado às mudanças constantes de requisitos?",
+      options: {
+        a: "Facilidade na manutenção",
+        b: "Dificuldade em estimar tempo e custo",
+        c: "Redução da produtividade do hardware",
+        d: "Maior envolvimento do usuário"
+      },
+      answer: "b"
+    },
+    {
+      question: "O que é documentação formal na Engenharia de Software?",
+      options: {
+        a: "Relatório informal para uso interno.",
+        b: "Documentação estruturada que reduz inconsistências e erros de comunicação.",
+        c: "Documentos escritos à mão.",
+        d: "Manual do usuário apenas."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual modelo de desenvolvimento prioriza a criação de versões preliminares para o cliente avaliar?",
+      options: {
+        a: "Cascata",
+        b: "Prototipação Rápida",
+        c: "RAD",
+        d: "Ágil"
+      },
+      answer: "b"
+    },
+    {
+      question: "O que o termo 'generalização' significa na Engenharia de Software?",
+      options: {
+        a: "Reutilização que diminui custos de desenvolvimento.",
+        b: "Criação de código específico para cada projeto.",
+        c: "Reescrever software para cada cliente.",
+        d: "Dividir o software em módulos menores."
+      },
+      answer: "a"
+    },
+    {
+      question: "Qual é uma das vantagens do modelo Ágil?",
+      options: {
+        a: "Requisitos fixos durante todo o projeto.",
+        b: "Entrega contínua e adaptação a mudanças rápidas.",
+        c: "Documentação extensa e formal.",
+        d: "Processo sequencial rígido."
+      },
+      answer: "b"
+    },
+    {
+      question: "Na ética da Engenharia de Software, qual ação é considerada mau uso do computador?",
+      options: {
+        a: "Desenvolver programas para clientes.",
+        b: "Disseminar vírus ou acessar sistemas sem autorização.",
+        c: "Testar softwares para melhorar qualidade.",
+        d: "Documentar o código adequadamente."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual o papel da especificação de requisitos?",
+      options: {
+        a: "Construir a interface gráfica.",
+        b: "Definir o que o sistema deve fazer de forma detalhada.",
+        c: "Escrever o código-fonte do programa.",
+        d: "Testar o sistema."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que é um software embarcado?",
+      options: {
+        a: "Software que funciona somente em computadores.",
+        b: "Software incorporado em dispositivos como micro-ondas e sensores.",
+        c: "Software que roda exclusivamente na nuvem.",
+        d: "Software de jogos eletrônicos."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual é a consequência da falta de envolvimento do usuário no desenvolvimento?",
+      options: {
+        a: "Aumento da qualidade do software.",
+        b: "Dificuldades na definição correta dos requisitos.",
+        c: "Redução do custo do projeto.",
+        d: "Entrega mais rápida do software."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que é o modelo RUP?",
+      options: {
+        a: "Modelo com fases bem definidas e iterações para projetos grandes e controlados.",
+        b: "Modelo ágil sem documentação.",
+        c: "Modelo sequencial rígido.",
+        d: "Modelo rápido para pequenos projetos."
+      },
+      answer: "a"
+    },
+    {
+      question: "O que o termo 'validação' significa no processo de software?",
+      options: {
+        a: "Verificar se o software atende às necessidades do cliente.",
+        b: "Criar a documentação técnica.",
+        c: "Definir os requisitos do sistema.",
+        d: "Implementar o código."
+      },
+      answer: "a"
+    },
+    {
+      question: "O que é 'manutenção' no contexto da Engenharia de Software?",
+      options: {
+        a: "A fase onde o software é descartado.",
+        b: "Ajustes e melhorias realizadas após a entrega do software.",
+        c: "Testes iniciais do sistema.",
+        d: "Desenvolvimento da interface do usuário."
+      },
+      answer: "b"
+    },
+    {
+      question: "O que indica o mito: 'Adicionar mais programadores resolve atrasos no cronograma'?",
+      options: {
+        a: "É verdade em todos os casos.",
+        b: "É um mito, pois pode aumentar a complexidade e atrasos.",
+        c: "Significa que mais pessoas aceleram sempre.",
+        d: "Nunca acontece."
+      },
+      answer: "b"
+    },
+    {
+      question: "Qual é o foco principal da fase de projeto em Engenharia de Software?",
+      options: {
+        a: "Definir a estrutura e arquitetura do sistema a ser desenvolvido.",
+        b: "Codificar o software.",
+        c: "Testar o software.",
+        d: "Especificar requisitos do usuário."
+      },
+      answer: "a"
+    },
+    {
+      question: "O que significa a formalidade na Engenharia de Software?",
+      options: {
+        a: "Evitar documentação para agilizar.",
+        b: "Documentação que reduz inconsistências e erros de comunicação.",
+        c: "Formalizar contratos entre clientes.",
+        d: "Usar linguagem formal no código."
+      },
+      answer: "b"
+    }
+  ];
+
+  const totalQuestions = questions.length;
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  const questionNumberElem = document.getElementById('question-number');
+  const questionTextElem = document.getElementById('question-text');
+  const optionsForm = document.getElementById('options-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedbackElem = document.getElementById('feedback');
+  const resultElem = document.getElementById('result');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function loadQuestion() {
+    submitBtn.disabled = true;
+    feedbackElem.textContent = '';
+    feedbackElem.className = '';
+    const q = questions[currentQuestionIndex];
+    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${totalQuestions}`;
+    questionTextElem.textContent = q.question;
+
+    optionsForm.innerHTML = '';
+    for (const [key, optionText] of Object.entries(q.options)) {
+      const optionHTML = `
+        <label class="option">
+          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+        </label>
+      `;
+      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+    }
+
+    // Ativar botão só se uma opção for selecionada
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => {
+      input.addEventListener('change', () => {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    const grade = (score / totalQuestions) * 10;
+    resultElem.style.display = 'block';
+    restartBtn.style.display = 'block';
+
+    let msg = `Você acertou ${score} de ${totalQuestions} questões. Nota: ${grade.toFixed(1)}/10.\n`;
+
+    if (grade >= 7) {
+      msg += "Parabéns, você foi bem!";
+    } else if (grade >= 5) {
+      msg += "Resultado razoável, mas dá para melhorar!";
+    } else {
+      msg += "Precisa estudar mais, mas não desista!";
+    }
+
+    resultElem.textContent = msg;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+    if (!selectedOption) {
+      alert('Selecione uma opção antes de enviar!');
+      return;
+    }
+    submitBtn.disabled = true;
+
+    const userAnswer = selectedOption.value;
+    const correctAnswer = questions[currentQuestionIndex].answer;
+
+    if (userAnswer === correctAnswer) {
+      score++;
+      feedbackElem.textContent = 'Resposta correta!';
+      feedbackElem.className = 'correct';
+    } else {
+      const correctText = questions[currentQuestionIndex].options[correctAnswer];
+      feedbackElem.textContent = `Resposta errada! A resposta correta é (${correctAnswer}) ${correctText}.`;
+      feedbackElem.className = 'wrong';
+    }
+
+    optionsForm.querySelectorAll('input[name="option"]').forEach(input => input.disabled = true);
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < totalQuestions) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }, 2000);
+  });
+
+  restartBtn.addEventListener('click', () => {
+    currentQuestionIndex = 0;
+    score = 0;
+
+    questionNumberElem.style.display = '';
+    questionTextElem.style.display = '';
+    optionsForm.style.display = '';
+    submitBtn.style.display = '';
+    feedbackElem.style.display = '';
+
+    resultElem.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    loadQuestion();
+  });
+
+  loadQuestion();
+</script>
+
+</body>
+</html>
