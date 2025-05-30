@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Dinâmico - Seleção Aleatória</title>
+<style>
+  body {
+    background: #f4f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  #quiz-container {
+    background: white;
+    max-width: 700px;
+    width: 90%;
+    padding: 30px 40px 40px 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  .question-number {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  label.option {
+    display: block;
+    background: #f0f3f7;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    color: #333;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  label.option:hover {
+    background: #d6e4ff;
+    border-color: #1a73e8;
+  }
+  input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #1a73e8;
+  }
+  button#submit-btn {
+    background: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  button#submit-btn:disabled {
+    background: #a0bff9;
+    cursor: not-allowed;
+  }
+  button#submit-btn:hover:not(:disabled) {
+    background: #145dbf;
+  }
+  #feedback {
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 18px;
+    min-height: 30px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  #feedback.correct {
+    color: #0f5132;
+    background: #d1e7dd;
+    border: 1px solid #badbcc;
+  }
+  #feedback.wrong {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+  }
+  #result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+  #restart-btn {
+    margin-top: 25px;
+    background: #28a745;
+    color: white;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #restart-btn:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Quiz Dinâmico - 10 Perguntas Aleatórias</h1>
+  <div class="question-number" id="question-number"></div>
+  <div class="question-text" id="question-text"></div>
+  <form id="options-form" class="options"></form>
+  <button id="submit-btn" disabled>Responder</button>
+  <div id="feedback"></div>
+  <div id="result" style="display:none;"></div>
+  <button id="restart-btn" style="display:none;">Reiniciar Quiz</button>
+</div>
+
+<script>
+const fullCatalog = [
+  { question: "O que é software?", options: {a:"Só código", b:"Conjunto programas e docs", c:"Hardware", d:"Sistema operacional"}, answer: "b" },
+  { question: "Qual o objetivo da Engenharia de Software?", options: {a:"Fazer rápido", b:"Qualidade e manutenção", c:"Somente hardware", d:"Nada"}, answer: "b" },
+  { question: "Qual modelo é sequencial?", options: {a:"Ágil", b:"Cascata", c:"Espiral", d:"RAD"}, answer: "b" },
+  { question: "O que é prototipação?", options: {a:"Codificar", b:"Testar", c:"Elicitação e validação", d:"Documentar"}, answer: "c" },
+  { question: "Quem é responsável pelo Product Owner?", options: {a:"Gerenciar prioridades", b:"Codificar", c:"Testar", d:"Desenvolver infra"}, answer: "a" },
+  { question: "O que é decomposição?", options: {a:"Dividir sistema", b:"Remover código", c:"Reescrever", d:"Otimizar banco"}, answer: "a" },
+  { question: "O que é software embarcado?", options: {a:"Só PC", b:"Dispositivo eletrônico", c:"Nuvem", d:"Jogos"}, answer: "b" },
+  { question: "Qual a função do Scrum Master?", options: {a:"Remover impedimentos", b:"Codificar", c:"Gerenciar cliente", d:"Testar software"}, answer: "a" },
+  { question: "Qual modelo usa análise de risco?", options: {a:"Cascata", b:"RAD", c:"Espiral", d:"Ágil"}, answer: "c" },
+  { question: "O que é validação?", options: {a:"Ver se atende cliente", b:"Codificar", c:"Testar interno", d:"Especificar"}, answer: "a" },
+  { question: "O que é manutenção?", options: {a:"Descarte", b:"Ajustes pós entrega", c:"Testes", d:"Interface"}, answer: "b" },
+  { question: "Qual modelo é iterativo?", options: {a:"Cascata", b:"Ágil", c:"Sequencial", d:"Disco"}, answer: "b" },
+  { question: "O que é generalização?", options: {a:"Reutilização", b:"Reescrever", c:"Dividir módulo", d:"Sem documentação"}, answer: "a" },
+  { question: "Mito comum em Engenharia de Software?", options: {a:"Mais programadores resolvem atraso", b:"Documentação é necessária", c:"Iterar facilita", d:"ERP é comercial"}, answer: "a" },
+  { question: "O que significa formalidade?", options: {a:"Ferramentas caras", b:"Documentação correta", c:"Codificar rápido", d:"Estrutura rígida"}, answer: "b" },
+  
+  { question: "O que caracteriza o modelo RAD?", options: {a:"Desenvolvimento rápido", b:"Sequencial rígido", c:"Sem interação com cliente", d:"Grande documentação"}, answer: "a" },
+  { question: "Qual fase valida se o software atende o usuário?", options: {a:"Projeto", b:"Validação", c:"Codificação", d:"Manutenção"}, answer: "b" },
+  { question: "Quem é responsável pelo backlog no Scrum?", options: {a:"Scrum Master", b:"Product Owner", c:"Cliente", d:"Desenvolvedor"}, answer: "b" },
+  { question: "O que é backlog?", options: {a:"Lista de tarefas", b:"Código-fonte", c:"Documento legal", d:"Manual"}, answer: "a" },
+  { question: "Qual método é ágil?", options: {a:"Cascata", b:"Espiral", c:"Scrum", d:"Modelo V"}, answer: "c" },
+  { question: "Qual a importância da documentação?", options: {a:"Nenhuma", b:"Facilita manutenção", c:"Só para marketing", d:"Complica projeto"}, answer: "b" },
+  { question: "O que é teste unitário?", options: {a:"Testa o sistema inteiro", b:"Testa partes pequenas", c:"Teste feito por cliente", d:"Teste de documentação"}, answer: "b" },
+  { question: "O que significa 'especificação de requisitos'?", options: {a:"Detalhar funcionalidades", b:"Escrever código", c:"Fazer manutenção", d:"Testar software"}, answer: "a" },
+  { question: "Qual o papel do desenvolvedor?", options: {a:"Gerenciar projeto", b:"Testar produto", c:"Escrever código", d:"Documentar"}, answer: "c" },
+  { question: "O que é um bug?", options: {a:"Falha no software", b:"Nova funcionalidade", c:"Documento oficial", d:"Requisito do cliente"}, answer: "a" },
+  { question: "O que é um protótipo descartável?", options: {a:"Protótipo para teste interno", b:"Protótipo temporário para validar requisitos", c:"Versão final", d:"Software pronto"}, answer: "b" },
+  { question: "Como o Scrum melhora projetos?", options: {a:"Com planejamento rígido", b:"Com entregas rápidas e feedback", c:"Ignorando o cliente", d:"Sem reuniões"}, answer: "b" },
+  { question: "O que é um sprint?", options: {a:"Entrega longa", b:"Iteração curta no Scrum", c:"Plano de projeto", d:"Reunião mensal"}, answer: "b" },
+  { question: "O que significa ‘refatorar código’?", options: {a:"Escrever código novo", b:"Melhorar código sem mudar funcionalidade", c:"Deletar código", d:"Copiar código"}, answer: "b" },
+  { question: "Qual o propósito do teste de integração?", options: {a:"Testar código isolado", b:"Testar a interação entre módulos", c:"Testar hardware", d:"Testar usuário"}, answer: "b" },
+  { question: "O que é uma história de usuário?", options: {a:"Descrição simples de funcionalidade", b:"Documento formal", c:"Bug no software", d:"Código fonte"}, answer: "a" },
+  { question: "Qual modelo é conhecido por suas fases rígidas?", options: {a:"Ágil", b:"Cascata", c:"Scrum", d:"RAD"}, answer: "b" },
+  { question: "Qual o foco principal da fase de projeto?", options: {a:"Definir arquitetura", b:"Codificar", c:"Testar", d:"Especificar requisitos"}, answer: "a" },
+  { question: "O que é a métrica de software?", options: {a:"Medida quantitativa", b:"Número de linhas de código", c:"Nome do projeto", d:"Manual do usuário"}, answer: "a" },
+  { question: "Qual é a finalidade do controle de versão?", options: {a:"Gerenciar alterações no código", b:"Testar software", c:"Codificar rápido", d:"Documentar"}, answer: "a" },
+  { question: "O que significa ‘deploy’?", options: {a:"Testar software", b:"Liberar software para uso", c:"Codificar", d:"Especificar"}, answer: "b" },
+  { question: "O que é requisito funcional?", options: {a:"Como o sistema deve funcionar", b:"Como o sistema deve parecer", c:"Nome do software", d:"Documentação"}, answer: "a" },
+  { question: "O que é requisito não funcional?", options: {a:"Desempenho, segurança, usabilidade", b:"Funcionalidades", c:"Bug report", d:"Plano de projeto"}, answer: "a" },
+  { question: "Por que envolvimento do usuário é importante?", options: {a:"Aumenta custo", b:"Garante requisitos corretos", c:"Atrasa projeto", d:"Desnecessário"}, answer: "b" },
+  { question: "O que é modelo em espiral?", options: {a:"Modelo iterativo com análise de risco", b:"Modelo linear", c:"Modelo de cascata", d:"Modelo ágil"}, answer: "a" },
+  { question: "Qual a função da equipe de testes?", options: {a:"Codificar software", b:"Garantir qualidade testando funcionalidades", c:"Gerenciar projeto", d:"Documentar"}, answer: "b" },
+  { question: "O que é Continuous Integration (CI)?", options: {a:"Integração contínua do código para detectar erros rapidamente", b:"Entrega final", c:"Testes manuais", d:"Planejamento"}, answer: "a" },
+  { question: "O que é Technical Debt?", options: {a:"Código malfeito que precisa ser corrigido", b:"Dinheiro para comprar software", c:"Equipe técnica", d:"Documento técnico"}, answer: "a" },
+  { question: "O que é um framework?", options: {a:"Conjunto de ferramentas para desenvolvimento", b:"Bug report", c:"Linguagem de programação", d:"Documento"}, answer: "a" },
+  { question: "Qual a diferença entre verificação e validação?", options: {a:"Verificação checa conformidade técnica, validação checa satisfação do cliente", b:"São iguais", c:"Só validação importa", d:"Só verificação importa"}, answer: "a" },
+  { question: "O que é documentação de design?", options: {a:"Descrição da arquitetura e componentes", b:"Manual do usuário", c:"Código-fonte", d:"Relatório financeiro"}, answer: "a" },
+  { question: "Qual o principal objetivo da gestão de configuração?", options: {a:"Controlar versões e mudanças", b:"Gerenciar testes", c:"Desenvolver software", d:"Treinar equipe"}, answer: "a" },
+  { question: "O que é um bug crítico?", options: {a:"Erro que impede funcionamento", b:"Erro menor", c:"Funcionalidade nova", d:"Atualização"}, answer: "a" },
+  { question: "O que é design patterns?", options: {a:"Soluções reutilizáveis para problemas comuns", b:"Linguagens de programação", c:"Frameworks", d:"Bugs"}, answer: "a" },
+  { question: "Qual o benefício do desenvolvimento incremental?", options: {a:"Entrega gradual com feedback constante", b:"Entrega única ao final", c:"Sem testes", d:"Sem documentação"}, answer: "a" },
+  { question: "O que é uma release?", options: {a:"Versão oficial do software entregue ao cliente", b:"Bug report", c:"Prototipação", d:"Documento de projeto"}, answer: "a" },
+  { question: "O que é time-boxing?", options: {a:"Limitar tempo para atividades em metodologia ágil", b:"Planejamento ilimitado", c:"Sem prazo", d:"Documentação"}, answer: "a" },
+  { question: "O que é pair programming?", options: {a:"Duas pessoas programando juntas para melhorar qualidade", b:"Programação solo", c:"Teste manual", d:"Documentação"}, answer: "a" },
+  { question: "O que é backlog grooming?", options: {a:"Refinar e priorizar backlog no Scrum", b:"Excluir tarefas", c:"Codificar rápido", d:"Testar software"}, answer: "a" }
+];
+
+
+  function getRandomQuestions(catalog, n) {
+    const shuffled = catalog
+      .map(value => ({ value, sort: Math.random() }))
+      .sort((a,b) => a.sort - b.sort)
+      .map(({value}) => value);
+    return shuffled.slice(0, n);
+  }
+
+  let questions = [];
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  const questionNumberElem = document.getElementById('question-number');
+  const questionTextElem = document.getElementById('question-text');
+  const optionsForm = document.getElementById('options-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedbackElem = document.getElementById('feedback');
+  const resultElem = document.getElementById('result');
+  const restartBtn = document.getElementById('restart-btn');
+
+  function loadQuestion() {
+    submitBtn.disabled = true;
+    feedbackElem.textContent = '';
+    feedbackElem.className = '';
+    const q = questions[currentQuestionIndex];
+    questionNumberElem.textContent = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
+    questionTextElem.textContent = q.question;
+
+    optionsForm.innerHTML = '';
+    for (const [key, optionText] of Object.entries(q.options)) {
+      const optionHTML = `
+        <label class="option">
+          <input type="radio" name="option" value="${key}"> ${key}) ${optionText}
+        </label>
+      `;
+      optionsForm.insertAdjacentHTML('beforeend', optionHTML);
+    }
+
+    const inputs = optionsForm.querySelectorAll('input[name="option"]');
+    inputs.forEach(input => {
+      input.checked = false;
+      input.disabled = false;
+      input.addEventListener('change', () => {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function showResult() {
+    questionNumberElem.style.display = 'none';
+    questionTextElem.style.display = 'none';
+    optionsForm.style.display = 'none';
+    submitBtn.style.display = 'none';
+    feedbackElem.style.display = 'none';
+
+    resultElem.style.display = 'block';
+    resultElem.textContent = `Você acertou ${score} de ${questions.length} questões.`;
+
+    restartBtn.style.display = 'block';
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = optionsForm.querySelector('input[name="option"]:checked');
+    if (!selectedOption) return;
+
+    const answer = selectedOption.value;
+    const q = questions[currentQuestionIndex];
+    if (answer === q.answer) {
+      score++;
+      feedbackElem.textContent = "Resposta correta!";
+      feedbackElem.className = "correct";
+    } else {
+      feedbackElem.textContent = `Errado! A resposta correta é: ${q.answer}) ${q.options[q.answer]}`;
+      feedbackElem.className = "wrong";
+    }
+    submitBtn.disabled = true;
+    optionsForm.querySelectorAll('input[name="option"]').forEach(i => i.disabled = true);
+
+    setTimeout(() => {
+      feedbackElem.textContent = '';
+      feedbackElem.className = '';
+      nextQuestion();
+    }, 2500);
+  });
+
+  restartBtn.addEventListener('click', () => {
+    questions = getRandomQuestions(fullCatalog, 10);
+    currentQuestionIndex = 0;
+    score = 0;
+
+    questionNumberElem.style.display = 'block';
+    questionTextElem.style.display = 'block';
+    optionsForm.style.display = 'block';
+    submitBtn.style.display = 'inline-block';
+    feedbackElem.style.display = 'block';
+    resultElem.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    loadQuestion();
+  });
+
+  window.onload = () => {
+    questions = getRandomQuestions(fullCatalog, 10);
+    loadQuestion();
+  };
+</script>
+
+</body>
+</html>
